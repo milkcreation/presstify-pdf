@@ -6,42 +6,23 @@ use Dompdf\Dompdf as BaseDompdf;
 use Dompdf\Options;
 use tiFy\Plugins\Pdf\Contracts\Adapter;
 
+/**
+ * Class Dompdf
+ * @package tiFy\Plugins\Pdf\Adapter
+ *
+ * @see https://github.com/dompdf/dompdf/wiki/Usage
+ */
 class Dompdf extends AbstractAdapter
 {
     /**
-     * Liste des paramètres par défaut.
+     * {@inheritDoc}
      *
-     * @return array
+     * @return BaseDompdf
      */
-    public function defaults(): array
+    public function driver(): BaseDompdf
     {
-        return [
-            'args'     => [
-                'charset'     => get_bloginfo('charset') ?: 'utf-8',
-                'stylesheets' => []
-            ],
-            'filename' => 'file.pdf',
-            'html'     => function (...$args) {
-                return (string)$this->app->viewer('template::pdf/pdf', compact('args'));
-            },
-            'pdf'      => [
-                'base_path'   => PUBLIC_PATH,
-                'orientation' => 'portrait',
-                'size'        => 'A4',
-                'options'     => [
-                    'isPhpEnabled' => true
-                ]
-            ]
-        ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function driver()
-    {
-        if (is_null()) {
-            $this->driver = new Dompdf();
+        if (is_null($this->driver)) {
+            $this->driver = new BaseDompdf();
         }
 
         return $this->driver;
@@ -50,13 +31,11 @@ class Dompdf extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    protected function generate(): Adapter
+    public function generate(): Adapter
     {
         set_time_limit(0);
 
-        $html = is_callable($this->params('html'))
-            ? call_user_func_array($this->params('html'), $this->params('args', []))
-            : $this->params('html');
+        $html = $this->controller->getContent();
 
         $this->driver()->loadHtml($html);
         $this->driver()->render();
@@ -88,24 +67,22 @@ class Dompdf extends AbstractAdapter
     }
 
     /**
-     * Définition de la liste des options
-     *
-     * @param array $options
+     * @inheritDoc
      */
-    public function setOptions(array $options)
+    public function setConfig(array $params): Adapter
     {
-        if ($options = $this->params('options', [])) {
-            $this->pdf->setOptions(new Options($options));
+        if ($options = $params['options'] ?? []) {
+            $this->driver()->setOptions(new Options($options));
         }
 
-        if ($basePath = $this->params('base_path')) {
-            $this->pdf->setBasePath($basePath);
+        if ($basePath = $params['base_path'] ?? '') {
+            $this->driver()->setBasePath($basePath);
         }
 
-        if ($this->params('size') || $this->params('orientation')) {
-            $size = $this->params('size', 'A4');
-            $orientation = $this->params('orientation', 'portrait');
-            $this->pdf->setPaper($size, $orientation);
+        if (isset($params['size']) || isset($params['orientation'])) {
+            $size = $params['size'] ?? 'A4';
+            $orientation = $params['orientation'] ?? 'portrait';
+            $this->driver()->setPaper($size, $orientation);
         }
 
         return $this;

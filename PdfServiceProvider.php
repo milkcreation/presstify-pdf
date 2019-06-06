@@ -3,6 +3,8 @@
 namespace tiFy\Plugins\Pdf;
 
 use tiFy\Container\ServiceProvider;
+use tiFy\Plugins\Pdf\Adapter\Dompdf;
+use tiFy\Plugins\Pdf\Contracts\Adapter;
 
 class PdfServiceProvider extends ServiceProvider
 {
@@ -12,7 +14,8 @@ class PdfServiceProvider extends ServiceProvider
      * @var string[]
      */
     protected $provides = [
-        'pdf'
+        'pdf',
+        Adapter::class,
     ];
 
     /**
@@ -32,6 +35,10 @@ class PdfServiceProvider extends ServiceProvider
     {
         $this->getContainer()->share('pdf', function() {
             return new Pdf($this->getContainer());
+        });
+
+        $this->getContainer()->share(Adapter::class, function() {
+            return new Dompdf();
         });
     }
 }
