@@ -2,8 +2,6 @@
 
 namespace tiFy\Plugins\Pdf\Contracts;
 
-use tiFy\Contracts\Support\ParamsBag;
-
 interface Adapter
 {
     /**
@@ -12,13 +10,6 @@ interface Adapter
      * @return string
      */
     public function __toString(): string;
-
-    /**
-     * Liste des paramètres par défaut.
-     *
-     * @return array
-     */
-    public function defaults(): array;
 
     /**
      * Récupération du pilote génération de PDF.
@@ -42,23 +33,22 @@ interface Adapter
     public function output(): string;
 
     /**
-     * Définition ou récupération de l'instance ou d'attributs de configuration.
-     *
-     * @param string|array|null $key Indice de qualification|Liste des attributs à définir.
-     * @param mixed $default Valeur de retour par défaut lorsque l'indice de récupération d'un attribut est défini.
-     *
-     * @return ParamsBag|mixed
-     */
-    public function params($key = null, $default = null);
-
-    /**
      * Définition de la liste des options
      *
-     * @param array $options
+     * @param array $params Liste des paramètres de configuration.
      *
      * @return static
      */
-    public function setOptions(array $options): Adapter;
+    public function setConfig(array $params): Adapter;
+
+    /**
+     * Définition du controleur associé.
+     *
+     * @param Controller $controller
+     *
+     * @return Adapter
+     */
+    public function setController(Controller $controller): Adapter;
 
     /**
      * Récupération de la sortie stream du PDF.

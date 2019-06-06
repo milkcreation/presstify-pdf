@@ -2,7 +2,7 @@
 
 namespace tiFy\Plugins\Pdf;
 
-use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerInterface as Container;
 
 /**
  * Class Pdf
@@ -40,18 +40,18 @@ class Pdf
 {
     /**
      * Instance du conteneur d'injection de dépendances.
-     * @var ContainerInterface
+     * @var Container|null
      */
     protected $container;
 
     /**
      * CONSTRUCTEUR.
      *
-     * @param ContainerInterface $container
+     * @param Container|null $container
      *
      * @return void
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(?Container $container)
     {
         $this->container = $container;
     }

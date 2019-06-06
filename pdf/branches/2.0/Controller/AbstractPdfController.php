@@ -2,13 +2,27 @@
 
 namespace tiFy\Plugins\Pdf\Controller;
 
-use Dompdf\Dompdf;
-use Dompdf\Options;
+use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use tiFy\Plugins\Pdf\Adapter\Dompdf;
+use tiFy\Plugins\Pdf\Contracts\Adapter;
+use tiFy\Plugins\Pdf\Contracts\Controller;
 use tiFy\Support\ParamsBag;
 
-abstract class AbstractPdfController
+abstract class AbstractPdfController implements Controller
 {
+    /**
+     * Instance du générateur de PDF.
+     * @var Adapter
+     */
+    protected $adapter;
+
+    /**
+     * Instance du gestionnaire d'injection de dépendance.
+     * @var Container|null
+     */
+    protected $container;
+
     /**
      * Instance du gestionnaire de paramètres de configuration.
      * @var ParamsBag
@@ -16,15 +30,29 @@ abstract class AbstractPdfController
     protected $params;
 
     /**
-     * Instance de la librairie de génération de PDF.
-     * @var Dompdf
-     */
-    protected $pdf;
-
-    /**
-     * Initialisation du controleur.
+     * CONSTRUCTEUR.
+     *
+     * @param Container|null $container Instance du gestionnaire d'injection de dépendance.
      *
      * @return void
+     */
+    public function __construct(?Container $container)
+    {
+        $this->container = $container;
+
+        $this->boot();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function adapter() : Adapter
+    {
+        return $this->adapter;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function boot(): void
     {
@@ -32,21 +60,12 @@ abstract class AbstractPdfController
     }
 
     /**
-     * Liste des paramètres par défaut.
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function defaults()
+    public function defaults(): array
     {
         return [
-            'args'     => [
-                'charset'     => get_bloginfo('charset') ?: 'utf-8',
-                'stylesheets' => []
-            ],
             'filename' => 'file.pdf',
-            'html'     => function (...$args) {
-                return (string)$this->app->viewer('template::pdf/pdf', compact('args'));
-            },
             'pdf'      => [
                 'driver'      => 'dompdf',
                 'base_path'   => PUBLIC_PATH,
@@ -61,12 +80,23 @@ abstract class AbstractPdfController
     }
 
     /**
-     * Définition ou récupération de l'instance ou d'attributs de configuration.
-     *
-     * @param string|array|null $key Indice de qualification|Liste des attributs à définir.
-     * @param mixed $default Valeur de retour par défaut lorsque l'indice de récupération d'un attribut est défini.
-     *
-     * @return ParamsBag|mixed
+     * @inheritDoc
+     */
+    public function getContent(): string
+    {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getContainer(): ?Container
+    {
+        return $this->container;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function params($key = null, $default = null)
     {
@@ -80,57 +110,15 @@ abstract class AbstractPdfController
     }
 
     /**
-     * Génération du PDF.
-     *
-     * @return Dompdf
+     * @inheritDoc
      */
-    protected function pdfGenerate(): Dompdf
+    public function parse(...$args): Controller
     {
-        set_time_limit(0);
-
-        $html = is_callable($this->params('html'))
-            ? call_user_func_array($this->params('html'), $this->params('args', []))
-            : $this->params('html');
-
-        $this->pdf->loadHtml($html);
-        $this->pdf->render();
-
-        return $this->pdf;
+        return $this;
     }
 
     /**
-     * Récupération de la sortie d'affichage du PDF.
-     *
-     * @return string
-     */
-    public function pdfOutput(): string
-    {
-        $this->pdfGenerate();
-
-        return $this->pdf->output();
-    }
-
-    /**
-     * Récupération de la sortie stream du PDF.
-     *
-     * @return resource
-     */
-    public function pdfStream()
-    {
-        $string = $this->pdfOutput();
-        $stream = fopen('php://memory', 'r+');
-        fwrite($stream, $string);
-        rewind($stream);
-
-        return $stream;
-    }
-
-    /**
-     * Récupération de la reponse HTTP.
-     *
-     * @param string $disposition inline|attachment.
-     *
-     * @return StreamedResponse
+     * @inheritDoc
      */
     public function response($disposition = 'inline'): StreamedResponse
     {
@@ -141,7 +129,7 @@ abstract class AbstractPdfController
             'Content-Disposition' => $disposition,
         ]);
         $response->setCallback(function () {
-            $stream = $this->setPdf()->pdfStream();
+            $stream = $this->setAdapter()->adapter()->stream();
             fpassthru($stream);
             fclose($stream);
         });
@@ -150,53 +138,50 @@ abstract class AbstractPdfController
     }
 
     /**
-     * Affichage du PDF
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function responseDisplay(): StreamedResponse
+    public function responseDisplay(...$args): StreamedResponse
     {
-        $this->params(request()->input('params', []));
-
-        return $this->response('inline');
+        return $this->parse(...$args)->response('inline');
     }
 
     /**
-     * Téléchargement du PDF.
-     *
-     * @return StreamedResponse
+     * @inheritDoc
      */
-    public function responseDownload(): StreamedResponse
+    public function responseDownload(...$args): StreamedResponse
     {
-        $this->params(request()->input('params', []));
-
-        return $this->response('attachment');
+        return $this->parse(...$args)->response('attachment');
     }
 
     /**
-     * Définition de l'instance du générateur de PDF.
-     *
-     * @param Dompdf $dompdf Instance du générateur de PDF
-     *
-     * @return Pdf
+     * @inheritDoc
      */
-    public function setPdf(?Dompdf $dompdf = null): self
+    public function responseHtml(...$args): string
     {
-        $this->pdf = $dompdf ?: new Dompdf();
+        return $this->parse(...$args)->getContent();
+    }
 
-        if ($options = $this->params('pdf.options', [])) {
-            $this->pdf->setOptions(new Options($options));
+    /**
+     * @inheritDoc
+     */
+    public function setAdapter(?Adapter $adapter = null): Controller
+    {
+        if ($adapter) {
+            $this->adapter = $adapter;
+        } elseif($container = $this->getContainer()) {
+            $alias = $this->params()->pull('pdf.driver', 'dompdf');
+            $this->adapter = $container->has("pdf.adapter.{$alias}")
+                ? $container->get("pdf.adapter.{$alias}") : $container->get(Adapter::class);
+        } else {
+            switch($this->params()->pull('pdf.driver', 'dompdf')) {
+                default :
+                case 'dompdf' :
+                    $this->adapter = new Dompdf();
+                    break;
+            }
         }
 
-        if ($basePath = $this->params('pdf.base_path')) {
-            $this->pdf->setBasePath($basePath);
-        }
-
-        if ($this->params('pdf.size') || $this->params('pdf.orientation')) {
-            $size = $this->params('pdf.size', 'A4');
-            $orientation = $this->params('pdf.orientation', 'portrait');
-            $this->pdf->setPaper($size, $orientation);
-        }
+        $this->adapter->setController($this)->setConfig($this->params('pdf', []));
 
         return $this;
     }

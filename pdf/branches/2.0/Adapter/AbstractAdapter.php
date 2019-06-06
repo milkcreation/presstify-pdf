@@ -3,12 +3,18 @@
 namespace tiFy\Plugins\Pdf\Adapter;
 
 use tiFy\Plugins\Pdf\Contracts\Adapter;
-use tiFy\Support\ParamsBag;
+use tiFy\Plugins\Pdf\Contracts\Controller;
 
 abstract class AbstractAdapter implements Adapter
 {
     /**
-     * Instance du pilote de génération de PDF
+     * Instance du controleur associé.
+     * @var Controller
+     */
+    protected $controller;
+
+    /**
+     * Instance du pilote de génération de PDF.
      * @var mixed
      */
     protected $driver;
@@ -44,29 +50,20 @@ abstract class AbstractAdapter implements Adapter
     }
 
     /**
-     * Définition ou récupération de l'instance ou d'attributs de configuration.
-     *
-     * @param string|array|null $key Indice de qualification|Liste des attributs à définir.
-     * @param mixed $default Valeur de retour par défaut lorsque l'indice de récupération d'un attribut est défini.
-     *
-     * @return ParamsBag|mixed
+     * @inheritDoc
      */
-    public function params($key = null, $default = null)
+    public function setConfig(array $params): Adapter
     {
-        if (is_null($key)) {
-            return $this->params;
-        } elseif (is_array($key)) {
-            return $this->params->set($key);
-        } else {
-            return $this->params->get($key, $default);
-        }
+        return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function setOptions(array $options): Adapter
+    public function setController(Controller $controller): Adapter
     {
+        $this->controller = $controller;
+
         return $this;
     }
 
