@@ -15,7 +15,7 @@ class PdfServiceProvider extends ServiceProvider
      */
     protected $provides = [
         'pdf',
-        Adapter::class,
+        Adapter::class
     ];
 
     /**
