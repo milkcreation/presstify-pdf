@@ -10,7 +10,7 @@ use Psr\Container\ContainerInterface as Container;
  * @desc Extension PresstiFy de génération de PDF.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Pdf
- * @version 2.0.0
+ * @version 2.0.1
  *
  * USAGE :
  * Activation
