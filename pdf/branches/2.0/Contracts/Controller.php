@@ -6,7 +6,7 @@ use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Support\ParamsBag;
 
-interface Controller
+interface Controller extends ParamsBag
 {
     /**
      * Récupération de l'instance du générateur de PDF.
@@ -44,23 +44,13 @@ interface Controller
     public function getContainer(): ?Container;
 
     /**
-     * Définition ou récupération de l'instance ou d'attributs de configuration.
-     *
-     * @param string|array|null $key Indice de qualification|Liste des attributs à définir.
-     * @param mixed $default Valeur de retour par défaut lorsque l'indice de récupération d'un attribut est défini.
-     *
-     * @return ParamsBag|mixed
-     */
-    public function params($key = null, $default = null);
-
-    /**
      * Traitement d'une liste de variable passées en argument.
      *
      * @param array ...$args
      *
      * @return static
      */
-    public function parse(...$args): Controller;
+    public function parseArgs(...$args): Controller;
 
     /**
      * Récupération de la reponse HTTP.
