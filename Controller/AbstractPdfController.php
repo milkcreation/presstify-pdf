@@ -4,9 +4,9 @@ namespace tiFy\Plugins\Pdf\Controller;
 
 use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use tiFy\Plugins\Pdf\Adapter\Dompdf;
-use tiFy\Plugins\Pdf\Contracts\Adapter;
-use tiFy\Plugins\Pdf\Contracts\Controller;
+use tiFy\Contracts\Filesystem\LocalFilesystem;
+use tiFy\Filesystem\StorageManager;
+use tiFy\Plugins\Pdf\{Adapter\Dompdf, Contracts\Adapter, Contracts\Controller};
 use tiFy\Support\ParamsBag;
 
 abstract class AbstractPdfController extends ParamsBag implements Controller
@@ -22,6 +22,12 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      * @var Container|null
      */
     protected $container;
+
+    /**
+     * Instance du gestionnaire de stockage des fichiers.
+     * @var LocalFilesystem|null|false
+     */
+    protected $storage;
 
     /**
      * CONSTRUCTEUR.
@@ -40,7 +46,7 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     /**
      * @inheritDoc
      */
-    public function adapter() : Adapter
+    public function adapter(): Adapter
     {
         return $this->adapter;
     }
@@ -66,10 +72,11 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
                 'orientation' => 'portrait',
                 'size'        => 'A4',
                 'options'     => [
-                    'isPhpEnabled' => true
-                ]
+                    'isPhpEnabled' => true,
+                ],
             ],
             'storage'  => false,
+            'renew'    => false
         ];
     }
 
@@ -92,6 +99,14 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     /**
      * @inheritDoc
      */
+    public function getFilename(): string
+    {
+        return $this->get('filename');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function parseArgs(...$args): Controller
     {
         return $this;
@@ -102,14 +117,19 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      */
     public function response($disposition = 'inline'): StreamedResponse
     {
+        set_time_limit(0);
+
+        $this->parse()->setAdapter();
+
         $response = new StreamedResponse();
-        $disposition = $response->headers->makeDisposition($disposition, $this->get('filename'));
+        $disposition = $response->headers->makeDisposition($disposition, $this->getFilename());
         $response->headers->replace([
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => $disposition,
         ]);
         $response->setCallback(function () {
-            $stream = $this->setAdapter()->adapter()->stream();
+            $stream = $this->storage() ? $this->store() : $this->adapter()->stream();
+
             fpassthru($stream);
             fclose($stream);
         });
@@ -148,12 +168,12 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     {
         if ($adapter) {
             $this->adapter = $adapter;
-        } elseif($container = $this->getContainer()) {
+        } elseif ($container = $this->getContainer()) {
             $alias = $this->pull('pdf.driver', 'dompdf');
             $this->adapter = $container->has("pdf.adapter.{$alias}")
                 ? $container->get("pdf.adapter.{$alias}") : $container->get(Adapter::class);
         } else {
-            switch($this->pull('pdf.driver', 'dompdf')) {
+            switch ($this->pull('pdf.driver', 'dompdf')) {
                 default :
                 case 'dompdf' :
                     $this->adapter = new Dompdf();
@@ -164,5 +184,46 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
         $this->adapter->setController($this)->setConfig($this->pull('pdf', []));
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function renew(): bool
+    {
+        return (bool)$this->get('renew', false);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function storage(): ?LocalFilesystem
+    {
+        if (is_null($this->storage)) {
+            $storage = $this->get('storage');
+
+            if (is_string($storage)) {
+                $manager = $this->getContainer() ? $this->getContainer()->get('storage') : new StorageManager();
+                $storage = $manager->localFilesytem($storage);
+            }
+
+            $this->storage = ($storage instanceof LocalFilesystem)  ? $storage : null;
+        }
+
+        return $this->storage;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function store()
+    {
+        if ($storage = $this->storage()) {
+            if (!$storage->has($this->getFilename()) || $this->renew()) {
+                $storage->putStream($this->getFilename(), $this->adapter()->stream());
+            }
+
+            return $this->storage()->readStream($this->getFilename());
+        }
     }
 }
