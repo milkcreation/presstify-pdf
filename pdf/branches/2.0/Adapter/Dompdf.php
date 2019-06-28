@@ -56,19 +56,6 @@ class Dompdf extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function pdfStream()
-    {
-        $string = $this->output();
-        $stream = fopen('php://memory', 'r+');
-        fwrite($stream, $string);
-        rewind($stream);
-
-        return $stream;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function setConfig(array $params): Adapter
     {
         if ($options = $params['options'] ?? []) {

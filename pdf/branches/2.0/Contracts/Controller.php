@@ -4,7 +4,9 @@ namespace tiFy\Plugins\Pdf\Contracts;
 
 use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use tiFy\Contracts\Filesystem\LocalFilesystem;
 use tiFy\Contracts\Support\ParamsBag;
+use tiFy\Filesystem\StorageManager;
 
 interface Controller extends ParamsBag
 {
@@ -42,6 +44,13 @@ interface Controller extends ParamsBag
      * @return Container|null
      */
     public function getContainer(): ?Container;
+
+    /**
+     * Récupération du nom de qualification du fichier PDF.
+     *
+     * @return string
+     */
+    public function getFilename(): string;
 
     /**
      * Traitement d'une liste de variable passées en argument.
@@ -96,4 +105,25 @@ interface Controller extends ParamsBag
      * @return static
      */
     public function setAdapter(?Adapter $adapter = null): Controller;
+
+    /**
+     * Récupération de l'état de demande de renouvellement du fichier stocké.
+     *
+     * @return boolean
+     */
+    public function renew(): bool;
+
+    /**
+     * Récupération de l'instance du gestionnaire de stockage du fichier.
+     *
+     * @return LocalFilesystem|null
+     */
+    public function storage(): ?LocalFilesystem;
+
+    /**
+     * Stockage du fichier dans le répertoire de dépôt.
+     *
+     * @return mixed
+     */
+    public function store();
 }
