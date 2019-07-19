@@ -25,7 +25,7 @@ class HelloWorldController extends AbstractPdfController
     public function getContent(): string
     {
         ob_start();
-        extract($this->params('args', []));
+        extract($this->get('args', []));
         require_once (dirname(__DIR__) . '/Resources/views/hello-world.php');
 
         return ob_get_clean();

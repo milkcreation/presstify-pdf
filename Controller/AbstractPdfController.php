@@ -36,7 +36,7 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      *
      * @return void
      */
-    public function __construct(?Container $container)
+    public function __construct(?Container $container = null)
     {
         $this->container = $container;
 
@@ -158,7 +158,7 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      */
     public function responseHtml(...$args): string
     {
-        return $this->parseArgs(...$args)->getContent();
+        return $this->parseArgs(...$args)->parse()->getContent();
     }
 
     /**
