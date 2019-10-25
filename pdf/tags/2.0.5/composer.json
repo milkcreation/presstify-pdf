@@ -1,0 +1,45 @@
+{
+  "name": "presstify-plugins/pdf",
+  "description": "Extension PresstiFy de génération de PDF.",
+  "type": "presstify-plugin",
+  "keywords": [
+    "presstify",
+    "plugins",
+    "pdf"
+  ],
+  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/pdf",
+  "time": "2019-10-25",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Jordy Manner",
+      "email": "jordy.manner@milkcreation.fr",
+      "role": "Developper"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://composer.tigreblanc.fr/presstify/"
+    }
+  ],
+  "require": {
+    "composer/installers": "~1.0",
+    "dompdf/dompdf": "^0.8.3",
+    "presstify/framework": "2.0.*",
+    "spatie/browsershot": "^3.29"
+  },
+  "autoload": {
+    "psr-4": {
+      "tiFy\\Plugins\\Pdf\\": ""
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "secure-http": false,
+    "sort-packages": true
+  }
+}
