@@ -6,7 +6,6 @@ use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
 use tiFy\Contracts\Support\ParamsBag;
-use tiFy\Filesystem\StorageManager;
 
 interface Controller extends ParamsBag
 {

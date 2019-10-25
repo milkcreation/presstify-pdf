@@ -5,12 +5,10 @@ namespace tiFy\Plugins\Pdf;
 use Psr\Container\ContainerInterface as Container;
 
 /**
- * Class Pdf
- *
  * @desc Extension PresstiFy de génération de PDF.
  * @author Jordy Manner <jordy@milkcreation.fr>
  * @package tiFy\Plugins\Pdf
- * @version 2.0.4
+ * @version 2.0.5
  *
  * USAGE :
  * Activation

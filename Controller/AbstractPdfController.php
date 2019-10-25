@@ -2,6 +2,7 @@
 
 namespace tiFy\Plugins\Pdf\Controller;
 
+use Exception;
 use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
@@ -215,6 +216,8 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
 
     /**
      * @inheritDoc
+     *
+     * @throws Exception
      */
     public function store()
     {
@@ -225,5 +228,6 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
 
             return $this->storage()->readStream($this->getFilename());
         }
+        return null;
     }
 }
