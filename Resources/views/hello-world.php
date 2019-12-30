@@ -1,8 +1,8 @@
 <?php
 /**
- * Example de PDF.
+ * Exemple de PDF.
  * ---------------------------------------------------------------------------------------------------------------------
- * @var App\Viewer $this
+ * @var App\View $this
  * @var string $charset
  * @var array $stylesheets
  */
@@ -11,6 +11,7 @@
 <html <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php echo $charset; ?>"/>
+    <title>Hello World</title>
     <?php foreach ($stylesheets as $path) : ?>
         <link type="text/css" rel="stylesheet" href="<?php echo $path; ?>">
     <?php endforeach; ?>
