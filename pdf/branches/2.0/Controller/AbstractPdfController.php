@@ -6,11 +6,12 @@ use Exception;
 use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
+use tiFy\Contracts\Http\Response;
 use tiFy\Filesystem\StorageManager;
 use tiFy\Plugins\Pdf\{Adapter\Dompdf, Contracts\Adapter, Contracts\Controller};
-use tiFy\Support\ParamsBag;
+use tiFy\Routing\BaseController;
 
-abstract class AbstractPdfController extends ParamsBag implements Controller
+abstract class AbstractPdfController extends BaseController implements Controller
 {
     /**
      * Instance du générateur de PDF.
@@ -19,30 +20,10 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     protected $adapter;
 
     /**
-     * Instance du gestionnaire d'injection de dépendance.
-     * @var Container|null
-     */
-    protected $container;
-
-    /**
      * Instance du gestionnaire de stockage des fichiers.
      * @var LocalFilesystem|null|false
      */
     protected $storage;
-
-    /**
-     * CONSTRUCTEUR.
-     *
-     * @param Container|null $container Instance du gestionnaire d'injection de dépendance.
-     *
-     * @return void
-     */
-    public function __construct(?Container $container = null)
-    {
-        $this->container = $container;
-
-        $this->boot();
-    }
 
     /**
      * @inheritDoc
@@ -50,14 +31,6 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     public function adapter(): Adapter
     {
         return $this->adapter;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function boot(): void
-    {
-
     }
 
     /**
@@ -116,7 +89,7 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
     /**
      * @inheritDoc
      */
-    public function response($disposition = 'inline'): StreamedResponse
+    public function responseDefault($disposition = 'inline'): StreamedResponse
     {
         set_time_limit(0);
 
@@ -143,7 +116,7 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      */
     public function responseDisplay(...$args): StreamedResponse
     {
-        return $this->parseArgs(...$args)->response('inline');
+        return $this->parseArgs(...$args)->responseDefault('inline');
     }
 
     /**
@@ -151,15 +124,15 @@ abstract class AbstractPdfController extends ParamsBag implements Controller
      */
     public function responseDownload(...$args): StreamedResponse
     {
-        return $this->parseArgs(...$args)->response('attachment');
+        return $this->parseArgs(...$args)->responseDefault('attachment');
     }
 
     /**
      * @inheritDoc
      */
-    public function responseHtml(...$args): string
+    public function responseHtml(...$args): Response
     {
-        return $this->parseArgs(...$args)->parse()->getContent();
+        return $this->response($this->parseArgs(...$args)->parse()->getContent());
     }
 
     /**

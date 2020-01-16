@@ -5,9 +5,13 @@ namespace tiFy\Plugins\Pdf\Contracts;
 use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
-use tiFy\Contracts\Support\ParamsBag;
+use tiFy\Contracts\Http\Response;
+use tiFy\Routing\BaseController;
 
-interface Controller extends ParamsBag
+/**
+ * @mixin BaseController
+ */
+interface Controller
 {
     /**
      * Récupération de l'instance du générateur de PDF.
@@ -61,13 +65,13 @@ interface Controller extends ParamsBag
     public function parseArgs(...$args): Controller;
 
     /**
-     * Récupération de la reponse HTTP.
+     * Récupération de la reponse HTTP par défaut.
      *
      * @param string $disposition inline|attachment.
      *
      * @return StreamedResponse
      */
-    public function response($disposition = 'inline'): StreamedResponse;
+    public function responseDefault($disposition = 'inline'): StreamedResponse;
 
     /**
      * Affichage du PDF.
@@ -92,9 +96,9 @@ interface Controller extends ParamsBag
      *
      * @param array ...$args Liste des variable passées en argument à la requête HTTP.
      *
-     * @return string
+     * @return Response
      */
-    public function responseHtml(...$args): string;
+    public function responseHtml(...$args): Response;
 
     /**
      * Définition de l'instance du générateur de PDF.
