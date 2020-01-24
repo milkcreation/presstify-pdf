@@ -44,11 +44,11 @@ interface Adapter
     /**
      * Définition du controleur associé.
      *
-     * @param Controller $controller
+     * @param PdfController $controller
      *
      * @return Adapter
      */
-    public function setController(Controller $controller): Adapter;
+    public function setController(PdfController $controller): Adapter;
 
     /**
      * Récupération de la sortie stream du PDF.

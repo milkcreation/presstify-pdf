@@ -2,7 +2,6 @@
 
 namespace tiFy\Plugins\Pdf\Contracts;
 
-use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
 use tiFy\Contracts\Http\Response;
@@ -11,7 +10,7 @@ use tiFy\Routing\BaseController;
 /**
  * @mixin BaseController
  */
-interface Controller
+interface PdfController
 {
     /**
      * Récupération de l'instance du générateur de PDF.
@@ -19,34 +18,6 @@ interface Controller
      * @return Adapter
      */
     public function adapter(): Adapter;
-
-    /**
-     * Initialisation du controleur.
-     *
-     * @return void
-     */
-    public function boot(): void;
-
-    /**
-     * Liste des paramètres par défaut.
-     *
-     * @return array
-     */
-    public function defaults(): array;
-
-    /**
-     * Récupération du contenu du PDF.
-     *
-     * @return string
-     */
-    public function getContent(): string;
-
-    /**
-     * Récupération du controleur d'injection de dépendances.
-     *
-     * @return Container|null
-     */
-    public function getContainer(): ?Container;
 
     /**
      * Récupération du nom de qualification du fichier PDF.
@@ -62,7 +33,21 @@ interface Controller
      *
      * @return static
      */
-    public function parseArgs(...$args): Controller;
+    public function handle(...$args): PdfController;
+
+    /**
+     * Récupération du contenu HTML du PDF.
+     *
+     * @return string
+     */
+    public function render(): string;
+
+    /**
+     * Récupération de l'état de demande de renouvellement du fichier stocké.
+     *
+     * @return boolean
+     */
+    public function renew(): bool;
 
     /**
      * Récupération de la reponse HTTP par défaut.
@@ -107,14 +92,7 @@ interface Controller
      *
      * @return static
      */
-    public function setAdapter(?Adapter $adapter = null): Controller;
-
-    /**
-     * Récupération de l'état de demande de renouvellement du fichier stocké.
-     *
-     * @return boolean
-     */
-    public function renew(): bool;
+    public function setAdapter(?Adapter $adapter = null): PdfController;
 
     /**
      * Récupération de l'instance du gestionnaire de stockage du fichier.
