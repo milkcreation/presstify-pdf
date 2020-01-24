@@ -12,9 +12,6 @@
 <head>
     <meta charset="<?php echo $charset; ?>"/>
     <title>Hello World</title>
-    <?php foreach ($stylesheets as $path) : ?>
-        <link type="text/css" rel="stylesheet" href="<?php echo $path; ?>">
-    <?php endforeach; ?>
 </head>
 <body>
     <table>

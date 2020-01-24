@@ -7,9 +7,6 @@ use Dompdf\Options;
 use tiFy\Plugins\Pdf\Contracts\Adapter;
 
 /**
- * Class Dompdf
- * @package tiFy\Plugins\Pdf\Adapter
- *
  * @see https://github.com/dompdf/dompdf/wiki/Usage
  */
 class Dompdf extends AbstractAdapter
@@ -35,7 +32,7 @@ class Dompdf extends AbstractAdapter
     {
         set_time_limit(0);
 
-        $html = $this->controller->getContent();
+        $html = $this->controller->render();
 
         $this->driver()->loadHtml($html);
         $this->driver()->render();

@@ -3,13 +3,13 @@
 namespace tiFy\Plugins\Pdf\Adapter;
 
 use tiFy\Plugins\Pdf\Contracts\Adapter;
-use tiFy\Plugins\Pdf\Contracts\Controller;
+use tiFy\Plugins\Pdf\Contracts\PdfController;
 
 abstract class AbstractAdapter implements Adapter
 {
     /**
      * Instance du controleur associé.
-     * @var Controller
+     * @var PdfController
      */
     protected $controller;
 
@@ -20,9 +20,7 @@ abstract class AbstractAdapter implements Adapter
     protected $driver;
 
     /**
-     * Résolution de la classe sous la forme d'un chaine de caractère.
-     *
-     * @return string
+     * @inheritDoc
      */
     public function __toString(): string
     {
@@ -60,7 +58,7 @@ abstract class AbstractAdapter implements Adapter
     /**
      * @inheritDoc
      */
-    public function setController(Controller $controller): Adapter
+    public function setController(PdfController $controller): Adapter
     {
         $this->controller = $controller;
 

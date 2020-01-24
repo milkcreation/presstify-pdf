@@ -3,15 +3,14 @@
 namespace tiFy\Plugins\Pdf\Controller;
 
 use Exception;
-use Psr\Container\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
 use tiFy\Contracts\Http\Response;
 use tiFy\Filesystem\StorageManager;
-use tiFy\Plugins\Pdf\{Adapter\Dompdf, Contracts\Adapter, Contracts\Controller};
+use tiFy\Plugins\Pdf\{Adapter\Dompdf, Contracts\Adapter, Contracts\PdfController};
 use tiFy\Routing\BaseController;
 
-abstract class AbstractPdfController extends BaseController implements Controller
+class BasePdfController extends BaseController implements PdfController
 {
     /**
      * Instance du générateur de PDF.
@@ -40,6 +39,9 @@ abstract class AbstractPdfController extends BaseController implements Controlle
     {
         return [
             'filename' => 'file.pdf',
+            'handle'   => function (PdfController &$controller, ...$args) {
+                return null;
+            },
             'pdf'      => [
                 'driver'      => 'dompdf',
                 'base_path'   => PUBLIC_PATH,
@@ -49,25 +51,12 @@ abstract class AbstractPdfController extends BaseController implements Controlle
                     'isPhpEnabled' => true,
                 ],
             ],
+            'render'   => function (PdfController &$controller) {
+                return '';
+            },
+            'renew'    => false,
             'storage'  => false,
-            'renew'    => false
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getContent(): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getContainer(): ?Container
-    {
-        return $this->container;
     }
 
     /**
@@ -81,9 +70,31 @@ abstract class AbstractPdfController extends BaseController implements Controlle
     /**
      * @inheritDoc
      */
-    public function parseArgs(...$args): Controller
+    public function handle(...$args): PdfController
     {
+        $this->parse();
+
+        if(is_callable(($handler = $this->get('handle', null)))) {
+            $handler($this, ...$args);
+        }
+
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function render(): string
+    {
+        return is_callable($render = $this->get('render', '')) ? $render($this) : $render;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function renew(): bool
+    {
+        return (bool)$this->get('renew', false);
     }
 
     /**
@@ -93,7 +104,7 @@ abstract class AbstractPdfController extends BaseController implements Controlle
     {
         set_time_limit(0);
 
-        $this->parse()->setAdapter();
+        $this->setAdapter();
 
         $response = new StreamedResponse();
         $disposition = $response->headers->makeDisposition($disposition, $this->getFilename());
@@ -116,7 +127,7 @@ abstract class AbstractPdfController extends BaseController implements Controlle
      */
     public function responseDisplay(...$args): StreamedResponse
     {
-        return $this->parseArgs(...$args)->responseDefault('inline');
+        return $this->handle(...$args)->responseDefault('inline');
     }
 
     /**
@@ -124,7 +135,7 @@ abstract class AbstractPdfController extends BaseController implements Controlle
      */
     public function responseDownload(...$args): StreamedResponse
     {
-        return $this->parseArgs(...$args)->responseDefault('attachment');
+        return $this->handle(...$args)->responseDefault('attachment');
     }
 
     /**
@@ -132,13 +143,13 @@ abstract class AbstractPdfController extends BaseController implements Controlle
      */
     public function responseHtml(...$args): Response
     {
-        return $this->response($this->parseArgs(...$args)->parse()->getContent());
+        return $this->response($this->handle(...$args)->render());
     }
 
     /**
      * @inheritDoc
      */
-    public function setAdapter(?Adapter $adapter = null): Controller
+    public function setAdapter(?Adapter $adapter = null): PdfController
     {
         if ($adapter) {
             $this->adapter = $adapter;
@@ -163,14 +174,6 @@ abstract class AbstractPdfController extends BaseController implements Controlle
     /**
      * @inheritDoc
      */
-    public function renew(): bool
-    {
-        return (bool)$this->get('renew', false);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function storage(): ?LocalFilesystem
     {
         if (is_null($this->storage)) {
@@ -181,7 +184,7 @@ abstract class AbstractPdfController extends BaseController implements Controlle
                 $storage = $manager->localFilesytem($storage);
             }
 
-            $this->storage = ($storage instanceof LocalFilesystem)  ? $storage : null;
+            $this->storage = ($storage instanceof LocalFilesystem) ? $storage : null;
         }
 
         return $this->storage;
@@ -201,6 +204,7 @@ abstract class AbstractPdfController extends BaseController implements Controlle
 
             return $this->storage()->readStream($this->getFilename());
         }
+
         return null;
     }
 }
