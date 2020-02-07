@@ -8,7 +8,7 @@
     "pdf"
   ],
   "homepage": "https://svn.tigreblanc.fr/presstify-plugins/pdf",
-  "time": "2020-01-24",
+  "time": "2020-02-07",
   "license": "proprietary",
   "authors": [
     {
@@ -39,7 +39,6 @@
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "secure-http": false,
     "sort-packages": true
   }
 }
