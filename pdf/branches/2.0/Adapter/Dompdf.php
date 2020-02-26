@@ -32,7 +32,7 @@ class Dompdf extends AbstractAdapter
     {
         set_time_limit(0);
 
-        $html = $this->controller->render();
+        $html = $this->controller->html();
 
         $this->driver()->loadHtml($html);
         $this->driver()->render();

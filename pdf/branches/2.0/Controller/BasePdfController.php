@@ -42,6 +42,9 @@ class BasePdfController extends BaseController implements PdfController
             'handle'   => function (PdfController &$controller, ...$args) {
                 return null;
             },
+            'html'   => function (PdfController &$controller) {
+                return '';
+            },
             'pdf'      => [
                 'driver'      => 'dompdf',
                 'base_path'   => PUBLIC_PATH,
@@ -51,9 +54,6 @@ class BasePdfController extends BaseController implements PdfController
                     'isPhpEnabled' => true,
                 ],
             ],
-            'render'   => function (PdfController &$controller) {
-                return '';
-            },
             'renew'    => false,
             'storage'  => false,
         ];
@@ -84,9 +84,9 @@ class BasePdfController extends BaseController implements PdfController
     /**
      * @inheritDoc
      */
-    public function render(): string
+    public function html(): string
     {
-        return is_callable($render = $this->get('render', '')) ? $render($this) : $render;
+        return is_callable($html = $this->get('html', '')) ? $html($this) : $html;
     }
 
     /**
@@ -112,9 +112,9 @@ class BasePdfController extends BaseController implements PdfController
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => $disposition,
         ]);
+
         $response->setCallback(function () {
             $stream = $this->storage() ? $this->store() : $this->adapter()->stream();
-
             fpassthru($stream);
             fclose($stream);
         });
@@ -143,7 +143,7 @@ class BasePdfController extends BaseController implements PdfController
      */
     public function responseHtml(...$args): Response
     {
-        return $this->response($this->handle(...$args)->render());
+        return $this->response($this->handle(...$args)->html());
     }
 
     /**

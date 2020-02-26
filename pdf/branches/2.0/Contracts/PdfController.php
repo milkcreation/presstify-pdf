@@ -36,11 +36,11 @@ interface PdfController
     public function handle(...$args): PdfController;
 
     /**
-     * Récupération du contenu HTML du PDF.
+     * Récupération de la sortie HTML du PDF.
      *
      * @return string
      */
-    public function render(): string;
+    public function html(): string;
 
     /**
      * Récupération de l'état de demande de renouvellement du fichier stocké.
