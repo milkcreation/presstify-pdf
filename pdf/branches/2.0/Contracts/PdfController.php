@@ -43,6 +43,15 @@ interface PdfController
     public function html(): string;
 
     /**
+     * Récupération du chemin vers une ressource depuis un chemin relatif.
+     *
+     * @param string $rel
+     *
+     * @return string
+     */
+    public function path(string $rel): string;
+
+    /**
      * Récupération de l'état de demande de renouvellement du fichier stocké.
      *
      * @return boolean
@@ -88,11 +97,20 @@ interface PdfController
     /**
      * Définition de l'instance du générateur de PDF.
      *
-     * @param Adapter $adapter Instance du générateur de PDF
+     * @param Adapter|null $adapter Instance du générateur de PDF
      *
      * @return static
      */
     public function setAdapter(?Adapter $adapter = null): PdfController;
+
+    /**
+     * Définition du chemin racine.
+     *
+     * @param string $base
+     *
+     * @return static
+     */
+    public function setBase(string $base): PdfController;
 
     /**
      * Récupération de l'instance du gestionnaire de stockage du fichier.

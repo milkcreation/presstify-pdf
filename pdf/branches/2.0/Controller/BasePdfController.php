@@ -7,8 +7,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use tiFy\Contracts\Filesystem\LocalFilesystem;
 use tiFy\Contracts\Http\Response;
 use tiFy\Filesystem\StorageManager;
-use tiFy\Plugins\Pdf\{Adapter\Dompdf, Contracts\Adapter, Contracts\PdfController};
+use tiFy\Plugins\Pdf\Adapter\Dompdf;
+use tiFy\Plugins\Pdf\Contracts\Adapter;
+use tiFy\Plugins\Pdf\Contracts\PdfController;
 use tiFy\Routing\BaseController;
+use tiFy\Support\Filesystem as fs;
+use tiFy\Support\Proxy\Url;
 
 class BasePdfController extends BaseController implements PdfController
 {
@@ -17,6 +21,12 @@ class BasePdfController extends BaseController implements PdfController
      * @var Adapter
      */
     protected $adapter;
+
+    /**
+     * Chemin racine.
+     * @var string|null
+     */
+    private $base;
 
     /**
      * Instance du gestionnaire de stockage des fichiers.
@@ -39,19 +49,21 @@ class BasePdfController extends BaseController implements PdfController
     {
         return [
             'filename' => 'file.pdf',
-            'handle'   => function (PdfController &$controller, ...$args) {
+            'handle'   => function (PdfController $controller, ...$args) {
                 return null;
             },
-            'html'   => function (PdfController &$controller) {
+            'html'     => function (PdfController $controller) {
                 return '';
             },
             'pdf'      => [
                 'driver'      => 'dompdf',
-                'base_path'   => PUBLIC_PATH,
+                'base_path'   => ROOT_PATH,
                 'orientation' => 'portrait',
                 'size'        => 'A4',
                 'options'     => [
-                    'isPhpEnabled' => true,
+                    'isPhpEnabled'         => true,
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled'      => true,
                 ],
             ],
             'renew'    => false,
@@ -74,7 +86,7 @@ class BasePdfController extends BaseController implements PdfController
     {
         $this->parse();
 
-        if(is_callable(($handler = $this->get('handle', null)))) {
+        if (is_callable(($handler = $this->get('handle', null)))) {
             $handler($this, ...$args);
         }
 
@@ -92,6 +104,24 @@ class BasePdfController extends BaseController implements PdfController
     /**
      * @inheritDoc
      */
+    public function parse(): PdfController
+    {
+        parent::parse();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function path(string $rel): string
+    {
+        return fs::normalizePath($this->base . '/' . $rel);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function renew(): bool
     {
         return (bool)$this->get('renew', false);
@@ -102,7 +132,9 @@ class BasePdfController extends BaseController implements PdfController
      */
     public function responseDefault($disposition = 'inline'): StreamedResponse
     {
-        set_time_limit(0);
+        if (is_null($this->base)) {
+            $this->setBase(ROOT_PATH);
+        }
 
         $this->setAdapter();
 
@@ -143,6 +175,10 @@ class BasePdfController extends BaseController implements PdfController
      */
     public function responseHtml(...$args): Response
     {
+        if (is_null($this->base)) {
+            $this->setBase(Url::scope());
+        }
+
         return $this->response($this->handle(...$args)->html());
     }
 
@@ -167,6 +203,16 @@ class BasePdfController extends BaseController implements PdfController
         }
 
         $this->adapter->setController($this)->setConfig($this->pull('pdf', []));
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setBase(string $base): PdfController
+    {
+        $this->base = $base;
 
         return $this;
     }
