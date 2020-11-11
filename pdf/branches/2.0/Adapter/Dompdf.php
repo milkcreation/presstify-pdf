@@ -30,8 +30,6 @@ class Dompdf extends AbstractAdapter
      */
     public function generate(): Adapter
     {
-        set_time_limit(0);
-
         $html = $this->controller->html();
 
         $this->driver()->loadHtml($html);

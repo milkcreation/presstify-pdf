@@ -32,8 +32,6 @@ abstract class AbstractAdapter implements Adapter
      */
     public function generate(): Adapter
     {
-        set_time_limit(0);
-
         return $this->driver();
     }
 
