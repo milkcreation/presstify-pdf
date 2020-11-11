@@ -7,8 +7,8 @@
     "plugins",
     "pdf"
   ],
-  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/pdf",
-  "time": "2020-11-04",
+  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/pdf/",
+  "time": "2020-11-11",
   "license": "proprietary",
   "authors": [
     {
@@ -20,7 +20,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "https://composer.tigreblanc.fr/presstify"
+      "url": "https://composer.tigreblanc.fr/presstify/"
     }
   ],
   "require": {
