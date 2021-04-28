@@ -1,0 +1,43 @@
+{
+  "name": "presstify-plugins/pdf",
+  "description": "Extension PresstiFy de génération de PDF.",
+  "type": "presstify-plugin",
+  "keywords": [
+    "presstify",
+    "plugins",
+    "pdf"
+  ],
+  "homepage": "https://svn.presstify.com/presstify-plugins/pdf/",
+  "time": "2021-04-28",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Jordy Manner",
+      "email": "jordy@presstify.com",
+      "role": "Developper"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://composer.presstify.com/presstify/"
+    }
+  ],
+  "require": {
+    "composer/installers": "~1.0",
+    "dompdf/dompdf": "^1.0",
+    "presstify/framework": ">=1.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "tiFy\\Plugins\\Pdf\\": ""
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
+}
