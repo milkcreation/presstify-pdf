@@ -7,27 +7,26 @@
     "plugins",
     "pdf"
   ],
-  "homepage": "https://svn.tigreblanc.fr/presstify-plugins/pdf/",
-  "time": "2020-11-11",
+  "homepage": "https://svn.presstify.com/presstify-plugins/pdf/",
+  "time": "2021-04-28",
   "license": "proprietary",
   "authors": [
     {
       "name": "Jordy Manner",
-      "email": "jordy.manner@milkcreation.fr",
+      "email": "jordy@presstify.com",
       "role": "Developper"
     }
   ],
   "repositories": [
     {
       "type": "composer",
-      "url": "https://composer.tigreblanc.fr/presstify/"
+      "url": "https://composer.presstify.com/presstify/"
     }
   ],
   "require": {
     "composer/installers": "~1.0",
-    "dompdf/dompdf": "^0.8.3",
-    "presstify/framework": ">=1.4",
-    "spatie/browsershot": "^3.4"
+    "dompdf/dompdf": "^1.0",
+    "presstify/framework": ">=1.4"
   },
   "autoload": {
     "psr-4": {
