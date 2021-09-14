@@ -7,20 +7,13 @@
     "plugins",
     "pdf"
   ],
-  "homepage": "https://svn.presstify.com/presstify-plugins/pdf/",
-  "time": "2021-04-28",
-  "license": "proprietary",
+  "homepage": "https://github.com/milkcreation/presstify-pdf.git",
+  "time": "2021-09-14",
   "authors": [
     {
       "name": "Jordy Manner",
       "email": "jordy@presstify.com",
       "role": "Developper"
-    }
-  ],
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://composer.presstify.com/presstify/"
     }
   ],
   "require": {
